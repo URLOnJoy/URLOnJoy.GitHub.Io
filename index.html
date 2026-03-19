@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>URLOnJoy Shortener</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 12px;
+      width: 350px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #3b82f6;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    .preview {
+      margin-top: 15px;
+      font-size: 0.9em;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>URLOnJoy</h2>
+
+  <input id="shortName" placeholder="Short name (e.g. yt)" />
+  <input id="longUrl" placeholder="https://example.com/very/long/link" />
+
+  <button onclick="generateURLFile()">Short That URL!</button>
+
+  <div class="preview" id="preview"></div>
+</div>
+
+<script>
+function generateURLFile() {
+  const name = document.getElementById("shortName").value.trim();
+  const url = document.getElementById("longUrl").value.trim();
+
+  if (!name || !url) {
+    alert("Please fill in both fields.");
+    return;
+  }
+
+  // Ensure URL has protocol
+  let fixedUrl = url;
+  if (!fixedUrl.startsWith("http://") && !fixedUrl.startsWith("https://")) {
+    fixedUrl = "https://" + fixedUrl;
+  }
+
+  const content = `[InternetShortcut]\nURL=${fixedUrl}`;
+
+  const blob = new Blob([content], { type: "text/plain" });
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+  link.download = name + ".url";
+  link.click();
+
+  document.getElementById("preview").innerText =
+    `Generated: ${name}.url → ${fixedUrl}`;
+}
+</script>
+
+</body>
+</html>
