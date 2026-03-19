@@ -26,7 +26,7 @@
       text-align: center;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
@@ -55,6 +55,7 @@
       margin-top: 15px;
       font-size: 0.9em;
       color: #94a3b8;
+      word-break: break-all;
     }
   </style>
 </head>
@@ -63,41 +64,72 @@
 <div class="container">
   <h2>URLOnJoy</h2>
 
-  <input id="shortName" placeholder="Short name (e.g. yt)" />
+  <input id="shortName" placeholder="Short name (optional)" />
   <input id="longUrl" placeholder="https://example.com/very/long/link" />
 
-  <button onclick="generateURLFile()">Short That URL!</button>
+  <select id="mode">
+    <option value="download">Download .url file</option>
+    <option value="link">Get hosted short URL</option>
+  </select>
+
+  <button onclick="generate()">Short That URL!</button>
 
   <div class="preview" id="preview"></div>
 </div>
 
 <script>
-function generateURLFile() {
-  const name = document.getElementById("shortName").value.trim();
-  const url = document.getElementById("longUrl").value.trim();
+function randomID(length = 9) {
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
 
-  if (!name || !url) {
-    alert("Please fill in both fields.");
+function generate() {
+  let name = document.getElementById("shortName").value.trim();
+  let url = document.getElementById("longUrl").value.trim();
+  const mode = document.getElementById("mode").value;
+
+  if (!url) {
+    alert("Please enter a URL.");
     return;
   }
 
-  // Ensure URL has protocol
-  let fixedUrl = url;
-  if (!fixedUrl.startsWith("http://") && !fixedUrl.startsWith("https://")) {
-    fixedUrl = "https://" + fixedUrl;
+  // Auto-generate ID if blank
+  if (!name) {
+    name = randomID();
   }
 
-  const content = `[InternetShortcut]\nURL=${fixedUrl}`;
+  // Fix URL
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
+  }
 
-  const blob = new Blob([content], { type: "text/plain" });
-  const link = document.createElement("a");
+  const content = `[InternetShortcut]\nURL=${url}`;
 
-  link.href = URL.createObjectURL(blob);
-  link.download = name + ".url";
-  link.click();
+  // MODE 1: Download file
+  if (mode === "download") {
+    const blob = new Blob([content], { type: "text/plain" });
+    const link = document.createElement("a");
 
-  document.getElementById("preview").innerText =
-    `Generated: ${name}.url → ${fixedUrl}`;
+    link.href = URL.createObjectURL(blob);
+    link.download = name + ".url";
+    link.click();
+
+    document.getElementById("preview").innerText =
+      `Downloaded: ${name}.url → ${url}`;
+  }
+
+  // MODE 2: Hosted short URL (display only)
+  if (mode === "link") {
+    const shortLink = `https://urlonjoy.github.io/${name}.url`;
+
+    document.getElementById("preview").innerHTML =
+      `Short URL:<br><a href="${shortLink}" target="_blank" style="color:#60a5fa">${shortLink}</a><br><br>
+      ⚠️ Note: You must host the .url file on your GitHub Pages repo for this to work.`;
+  }
 }
 </script>
 
